@@ -55,9 +55,9 @@ def handle_dialog(req, res):
         }
         return
 
-
-    res['response']['text'] = 'Кому вы хотите подарить подарок?'
-    if req['request']['original_utterance'].lower() in [
+    if len(ans) == 0:
+        res['response']['text'] = 'Кому вы хотите подарить подарок?'
+    elif req['request']['original_utterance'].lower() in [
         'мужигу',
         'мужчине',
         'пацану',
