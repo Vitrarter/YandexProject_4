@@ -50,7 +50,9 @@ def handle_dialog(req, res):
                 "Для одного",
                 "Для компании",
                 "Техника",
-                "Электроприборы"
+                "Электроприборы",
+                "от 2000 до 5000",
+                "до 2000"
             ]
         }
         return
@@ -123,15 +125,22 @@ def handle_dialog(req, res):
             return
 
     elif len(ans) == 3:
-        if ans[1]:
-            res['response']['text'] = 'Вот что удалось подобрать!'
-            res['response']['end_session'] = True
-            return
+        res['response']['text'] = 'Какой стоимости должен быть подарок?'
+        res['response']['end_session'] = True
+        return
 
+    elif len(ans) == 4:
+        if req['request']['original_utterance'].lower() in [
+            'до 2000',
+            '< 2000'
+        ]:
+            ans.append(1)
         else:
-            res['response']['text'] = 'Вот что удалось подобрать!'
-            res['response']['end_session'] = True
-            return
+            ans.append(0)
+        res['response']['text'] = 'Вот что удалось подобрать!'
+        res['response']['end_session'] = True
+        return
+
 
     res['response']['buttons'] = get_suggests(user_id)
 
