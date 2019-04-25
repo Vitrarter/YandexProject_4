@@ -11,7 +11,6 @@ ans = []
 
 @app.route('/post', methods=['POST'])
 def main():
-    global ans
     logging.info('Request: %r', request.json)
 
     response = {
@@ -34,6 +33,7 @@ def main():
 
 
 def handle_dialog(req, res):
+    global ans
     user_id = req['session']['user_id']  # если пользователь новый, то просим его представиться.
     if req['session']['new']:
         res['response']['text'] = 'Привет! Назови свое имя!'
@@ -177,7 +177,7 @@ def handle_dialog(req, res):
         res['response']['buttons'] = get_suggests(user_id)
         return
 
-
+    res['response']['buttons'] = get_suggests(user_id)
 
 def get_suggests(user_id):
     session = sessionStorage[user_id]
