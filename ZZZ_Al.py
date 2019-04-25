@@ -176,7 +176,10 @@ def handle_dialog(req, res):
         ans.append(1)
         res['response']['text'] = 'Вот что удалось подобрать!'
         res['response']['end_session'] = True
-    else:
+        return
+    elif req['request']['original_utterance'].lower() in [
+        'от 2000 до 5000',
+    ]:
         ans.append(0)
         res['response']['text'] = 'Вот что удалось подобрать!'
         res['response']['end_session'] = True
