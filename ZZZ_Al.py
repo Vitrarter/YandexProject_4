@@ -59,7 +59,6 @@ def handle_dialog(req, res):
 
     if len(ans) == 0:
         res['response']['text'] = 'Кому вы хотите подарить подарок?'
-    res['response']['buttons'] = get_suggests(user_id)
     if req['request']['original_utterance'].lower() in [
         'мужигу',
         'мужчине',
@@ -69,6 +68,7 @@ def handle_dialog(req, res):
         'сыну'
     ]:
         res['response']['text'] = 'Сколько ему лет?'
+        res['response']['buttons'] = get_suggests(user_id)
         ans.append(1)
         return
 
@@ -82,9 +82,9 @@ def handle_dialog(req, res):
         'дочке'
     ]:
         res['response']['text'] = 'Сколько ей лет?'
+        res['response']['buttons'] = get_suggests(user_id)
         ans.append(0)
         return
-
 
     if req['request']['original_utterance'].lower() in [
         'старая',
@@ -95,6 +95,7 @@ def handle_dialog(req, res):
         'взрослый'
     ]:
         res['response']['text'] = 'Какой тип товара вам подходит больше всего?'
+        res['response']['buttons'] = get_suggests(user_id)
         ans.append(1)
         return
 
@@ -104,38 +105,84 @@ def handle_dialog(req, res):
         'ребёнку'
     ]:
         res['response']['text'] = 'Какой тип товара вам подходит больше всего?'
+        res['response']['buttons'] = get_suggests(user_id)
         ans.append(0)
         return
 
-    if len(ans) == 2:
-        if ans[1]:
-            res['response']['text'] = 'Какой тип товара вам подходит больше всего?'
-            ans.append(1)
-            return
-
-        else:
-            res['response']['text'] = 'Какой тип товара вам подходит больше всего?'
-            ans.append(0)
-            return
-
-    if len(ans) == 3:
-        res['response']['text'] = 'Какой стоимости должен быть подарок?'
+    if req['request']['original_utterance'].lower() in [
+        'бытовой'
+    ]:
+        res['response']['text'] = 'Какой тип товара вам подходит больше всего?'
+        res['response']['buttons'] = get_suggests(user_id)
+        ans.append(1)
         return
 
-    if len(ans) == 4:
-        if req['request']['original_utterance'].lower() in [
-            'до 2000',
-            '< 2000'
-        ]:
-            ans.append(1)
+    elif req['request']['original_utterance'].lower() in [
+        'досуг'
+    ]:
+        res['response']['text'] = 'Какой тип товара вам подходит больше всего?'
+        res['response']['buttons'] = get_suggests(user_id)
+        ans.append(0)
+        return
+
+    if len(ans) == 3:
+        if ans[2]:
+            res['response']['text'] = 'Какой тип товара вам подходит больше всего?'
+            res['response']['buttons'] = get_suggests(user_id)
+            res['response']['buttons'] = get_suggests(user_id)
+            return
+
         else:
-            ans.append(0)
+            res['response']['text'] = 'Какой тип товара вам подходит больше всего?'
+            res['response']['buttons'] = get_suggests(user_id)
+            return
+
+    if req['request']['original_utterance'].lower() in [
+        'техника'
+    ]:
+        res['response']['text'] = 'Какой стоимости должен быть подарок?'
+        res['response']['buttons'] = get_suggests(user_id)
+        ans.append(1)
+        return
+
+    elif req['request']['original_utterance'].lower() in [
+        'Электроприборы'
+    ]:
+        res['response']['text'] = 'Какой стоимости должен быть подарок?'
+        res['response']['buttons'] = get_suggests(user_id)
+        ans.append(0)
+        return
+
+    if req['request']['original_utterance'].lower() in [
+        'для одного'
+    ]:
+        res['response']['text'] = 'Какой стоимости должен быть подарок?'
+        res['response']['buttons'] = get_suggests(user_id)
+        ans.append(1)
+        return
+
+    elif req['request']['original_utterance'].lower() in [
+        'для компании'
+    ]:
+        res['response']['text'] = 'Какой стоимости должен быть подарок?'
+        res['response']['buttons'] = get_suggests(user_id)
+        ans.append(0)
+        return
+
+    if req['request']['original_utterance'].lower() in [
+        'до 2000',
+        '< 2000'
+    ]:
+        ans.append(1)
+        res['response']['text'] = 'Вот что удалось подобрать!'
+        res['response']['end_session'] = True
+    else:
+        ans.append(0)
         res['response']['text'] = 'Вот что удалось подобрать!'
         res['response']['end_session'] = True
         return
 
-
-
+    res['response']['buttons'] = get_suggests(user_id)
 
 
 def get_suggests(user_id):
