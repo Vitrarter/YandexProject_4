@@ -94,7 +94,7 @@ def handle_dialog(req, res):
         'пожиой',
         'взрослый'
     ]:
-        res['response']['text'] = 'Какой тип товара вам подходит больше всего?'
+        res['response']['text'] = 'Какой тип товара вам подходит больше всего: бытовой или для дома?'
         res['response']['buttons'] = get_suggests(user_id)
         ans.append(1)
         return
@@ -104,7 +104,7 @@ def handle_dialog(req, res):
         'молодая',
         'ребёнку'
     ]:
-        res['response']['text'] = 'Какой тип товара вам подходит больше всего?'
+        res['response']['text'] = 'Какой тип товара вам подходит больше всего: бытовой или для дома?'
         res['response']['buttons'] = get_suggests(user_id)
         ans.append(0)
         return
@@ -112,7 +112,8 @@ def handle_dialog(req, res):
     if req['request']['original_utterance'].lower() in [
         'бытовой'
     ]:
-        res['response']['text'] = 'Какой тип товара вам подходит больше всего?'
+        res['response']['text'] = 'Какой тип товара вам подходит больше всего: техника или электроприборы?'
+        res['response']['buttons'] = get_suggests(user_id)
         res['response']['buttons'] = get_suggests(user_id)
         ans.append(1)
         return
@@ -120,22 +121,10 @@ def handle_dialog(req, res):
     elif req['request']['original_utterance'].lower() in [
         'досуг'
     ]:
-        res['response']['text'] = 'Какой тип товара вам подходит больше всего?'
+        res['response']['text'] = 'Какой тип товара вам подходит больше всего: для одного или для компании?'
         res['response']['buttons'] = get_suggests(user_id)
         ans.append(0)
         return
-
-    if len(ans) == 3:
-        if ans[2]:
-            res['response']['text'] = 'Какой тип товара вам подходит больше всего?'
-            res['response']['buttons'] = get_suggests(user_id)
-            res['response']['buttons'] = get_suggests(user_id)
-            return
-
-        else:
-            res['response']['text'] = 'Какой тип товара вам подходит больше всего?'
-            res['response']['buttons'] = get_suggests(user_id)
-            return
 
     if req['request']['original_utterance'].lower() in [
         'техника'
@@ -176,16 +165,18 @@ def handle_dialog(req, res):
         ans.append(1)
         res['response']['text'] = 'Вот что удалось подобрать!'
         res['response']['end_session'] = True
+        res['response']['buttons'] = get_suggests(user_id)
         return
+
     elif req['request']['original_utterance'].lower() in [
         'от 2000 до 5000',
     ]:
         ans.append(0)
         res['response']['text'] = 'Вот что удалось подобрать!'
         res['response']['end_session'] = True
+        res['response']['buttons'] = get_suggests(user_id)
         return
 
-    res['response']['buttons'] = get_suggests(user_id)
 
 
 def get_suggests(user_id):
