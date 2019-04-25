@@ -59,6 +59,7 @@ def handle_dialog(req, res):
 
     if len(ans) == 0:
         res['response']['text'] = 'Кому вы хотите подарить подарок?'
+    res['response']['buttons'] = get_suggests(user_id)
     if req['request']['original_utterance'].lower() in [
         'мужигу',
         'мужчине',
@@ -68,7 +69,6 @@ def handle_dialog(req, res):
         'сыну'
     ]:
         res['response']['text'] = 'Сколько ему лет?'
-        res['response']['buttons'] = get_suggests(user_id)
         ans.append(1)
         return
 
@@ -82,7 +82,6 @@ def handle_dialog(req, res):
         'дочке'
     ]:
         res['response']['text'] = 'Сколько ей лет?'
-        res['response']['buttons'] = get_suggests(user_id)
         ans.append(0)
         return
 
@@ -96,7 +95,6 @@ def handle_dialog(req, res):
         'взрослый'
     ]:
         res['response']['text'] = 'Какой тип товара вам подходит больше всего?'
-        res['response']['buttons'] = get_suggests(user_id)
         ans.append(1)
         return
 
@@ -106,30 +104,25 @@ def handle_dialog(req, res):
         'ребёнку'
     ]:
         res['response']['text'] = 'Какой тип товара вам подходит больше всего?'
-        res['response']['buttons'] = get_suggests(user_id)
         ans.append(0)
         return
 
     if len(ans) == 2:
         if ans[1]:
             res['response']['text'] = 'Какой тип товара вам подходит больше всего?'
-            res['response']['buttons'] = get_suggests(user_id)
-            res['response']['buttons'] = get_suggests(user_id)
             ans.append(1)
             return
 
         else:
             res['response']['text'] = 'Какой тип товара вам подходит больше всего?'
-            res['response']['buttons'] = get_suggests(user_id)
             ans.append(0)
             return
 
-    elif len(ans) == 3:
+    if len(ans) == 3:
         res['response']['text'] = 'Какой стоимости должен быть подарок?'
-        res['response']['end_session'] = True
         return
 
-    elif len(ans) == 4:
+    if len(ans) == 4:
         if req['request']['original_utterance'].lower() in [
             'до 2000',
             '< 2000'
@@ -142,7 +135,7 @@ def handle_dialog(req, res):
         return
 
 
-    res['response']['buttons'] = get_suggests(user_id)
+
 
 
 def get_suggests(user_id):
