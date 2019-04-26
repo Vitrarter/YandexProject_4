@@ -1,0 +1,289 @@
+from flask import Flask, request
+import logging
+import json
+
+app = Flask(__name__)
+logging.basicConfig(level=logging.INFO)
+
+sessionStorage = {}
+ans = []
+k = 1
+
+
+@app.route('/post', methods=['POST'])
+def main():
+    logging.info('Request: %r', request.json)
+
+    response = {
+        'session': request.json['session'],
+        'version': request.json['version'],
+        'response': {
+            'end_session': False
+        }
+    }
+
+    # Отправляем request.json и response в функцию handle_dialog.
+    # Она сформирует оставшиеся поля JSON, которые отвечают
+    # непосредственно за ведение диалога
+    handle_dialog(request.json, response)
+
+    logging.info('Response: %r', request.json)
+
+    # Преобразовываем в JSON и возвращаем
+    return json.dumps(response)
+
+
+def handle_dialog(req, res):
+    global ans, k
+    user_id = req['session']['user_id']  # если пользователь новый, то просим его представиться.
+    if req['session']['new']:
+        k = 0
+        res['response']['text'] = 'Привет! Назови свое имя!'
+        # созда\м словарь в который в будущем положим имя пользователя
+        sessionStorage[user_id] = {
+            'first_name': None,
+            'suggests': [
+                "Мужигу",
+                "Бабе",
+                "Взрослому",
+                "Ребенку",
+                "Бытовой",
+                "Досуг",
+                "Для одного",
+                "Для компании",
+                "Техника",
+                "Электроприборы",
+                "от 2000 до 5000",
+                "до 2000"
+            ]
+        }
+        return
+
+    if len(ans) == 0 and k == 0:
+        res['response']['text'] = 'Кому вы хотите подарить подарок?'
+        k = 1
+        res['response']['buttons'] = get_suggests(user_id)
+    elif k == 1:
+        res['response']['text'] = 'Я шото вас непонел'
+    if len(ans) == 0 and ('мужиг' in req['request']['original_utterance'].lower() or 'мужчин' in req['request'][
+        'original_utterance'].lower() \
+                          or 'пацан' in req['request']['original_utterance'].lower() or 'парн' in req['request'][
+                              'original_utterance'].lower() \
+                          or 'мальчик' in req['request']['original_utterance'].lower() or 'сын' in req['request'][
+                              'original_utterance'].lower()):
+        res['response']['text'] = 'Сколько ему лет?'
+        res['response']['buttons'] = get_suggests(user_id)
+        ans.append(1)
+        return
+
+
+
+    elif len(ans) == 0 and ('баб' in req['request']['original_utterance'].lower() or 'женщин' in req['request'][
+        'original_utterance'].lower() \
+ \
+                            or 'феминистк' in req['request']['original_utterance'].lower() or 'девушк' in
+                            req['request'][
+                                'original_utterance'].lower() \
+ \
+                            or 'девочк' in req['request']['original_utterance'].lower() or 'дочк' in req['request'][
+                                'original_utterance'].lower()):
+        res['response']['text'] = 'Сколько ей лет?'
+        res['response']['buttons'] = get_suggests(user_id)
+        ans.append(0)
+        return
+
+    if len(ans) == 1 and ('стар' in req['request']['original_utterance'].lower() or 'пожил' in req['request'][
+        'original_utterance'].lower() \
+                          or 'взросл' in req['request']['original_utterance'].lower()):
+        res['response']['text'] = 'Какой тип товара вам подходит больше всего: бытовой или для дома?'
+        res['response']['buttons'] = get_suggests(user_id)
+        ans.append(1)
+        return
+
+
+    elif len(ans) == 1 and ('молод' in req['request']['original_utterance'].lower() or 'ребёнк' in req['request'][
+        'original_utterance'].lower() \
+ \
+                            or 'ребенк' in req['request']['original_utterance'].lower()):
+        res['response']['text'] = 'Какой тип товара вам подходит больше всего: бытовой или для дома?'
+        res['response']['buttons'] = get_suggests(user_id)
+        ans.append(0)
+        return
+
+    if len(ans) == 2 and ('бытов' in req['request']['original_utterance'].lower()):
+        res['response']['text'] = 'Какой тип товара вам подходит больше всего: техника или электроприборы?'
+        res['response']['buttons'] = get_suggests(user_id)
+        res['response']['buttons'] = get_suggests(user_id)
+        ans.append(1)
+        return
+
+
+    elif len(ans) == 2 and ('досуг' in req['request']['original_utterance'].lower()):
+        res['response']['text'] = 'Какой тип товара вам подходит больше всего: для одного или для компании?'
+        res['response']['buttons'] = get_suggests(user_id)
+        ans.append(0)
+        return
+
+    if len(ans) == 3 and 'техник' in req['request']['original_utterance'].lower():
+        res['response']['text'] = 'Какой стоимости должен быть подарок?'
+        res['response']['buttons'] = get_suggests(user_id)
+        ans.append(1)
+        return
+
+
+    elif len(ans) == 3 and 'электроприбор' in req['request']['original_utterance'].lower():
+        res['response']['text'] = 'Какой стоимости должен быть подарок?'
+        res['response']['buttons'] = get_suggests(user_id)
+        ans.append(0)
+        return
+
+    if len(ans) == 3 and 'для одного' in req['request']['original_utterance'].lower():
+        res['response']['text'] = 'Какой стоимости должен быть подарок?'
+        res['response']['buttons'] = get_suggests(user_id)
+        res['response']['buttons'] = get_suggests(user_id)
+        ans.append(1)
+        return
+
+
+    elif len(ans) == 3 and 'для компан' in req['request']['original_utterance'].lower():
+        res['response']['text'] = 'Какой стоимости должен быть подарок?'
+        res['response']['buttons'] = get_suggests(user_id)
+        res['response']['buttons'] = get_suggests(user_id)
+        ans.append(0)
+        return
+
+    if len(ans) == 4 and req['request']['original_utterance'].lower() in [
+        'до 2000',
+        '< 2000'
+    ]:
+        ans.append(1)
+        res['response']['text'] = 'Вот что удалось подобрать!'
+        res['response']['buttons'] = get_suggests(user_id)
+        res['response']['end_session'] = True
+        return
+
+    elif len(ans) == 4 and req['request']['original_utterance'].lower() in [
+        'от 2000 до 5000',
+    ]:
+        ans.append(0)
+        res['response']['text'] = 'Вот что удалось подобрать!'
+        res['response']['buttons'] = get_suggests(user_id)
+        res['response']['end_session'] = True
+        return
+
+    if req['request']['original_utterance'].lower() in [
+        'перейти',
+        'Ничего не удалось найти, но вы можете спросить у этого человека'
+    ]:
+        ans = []
+        res['response']['text'] = 'Удачной покупки!'
+        res['response']['end_session'] = False
+        req['session']['new'] = True
+        return
+
+
+def get_suggests(user_id):
+    session = sessionStorage[user_id]
+
+    # Выбираем две первые подсказки из массива.
+    suggests = [
+        {'title': suggest, 'hide': False}
+        for suggest in session['suggests'][:2]
+    ]
+
+    # Убираем первую подсказку, чтобы подсказки менялись каждый раз.
+    session['suggests'] = session['suggests'][2:]
+    sessionStorage[user_id] = session
+
+    # Если осталась только одна подсказка, предлагаем подсказку
+    # со ссылкой на Яндекс.Маркет.
+    if len(suggests) < 2:
+        if ans[1] == 0 and ans[2] == 1:
+            suggests.append({
+                "title": "Ничего не удалось найти, но вы можете спросить у этого человека",
+                "url": "https://m.vk.com/id242062417",
+                "hide": True
+            })
+        elif ans[2] == 0:
+            if ans[3] == 0 and ans[1] == 0:
+                if ans[4] == 0:
+                    suggests.append({
+                        "title": "Перейти",
+                        "url": "https://zak-zak.ru/products/nastolnaya-igra-manchkin-kvest-4-e-rus-izd",
+                        "hide": True
+                    })
+                else:
+                    suggests.append({
+                        "title": "Перейти",
+                        "url": "https://market.yandex.ru/product--nastolnaia-igra-hasbro-igry-monopoly-klassicheskaia-obnovlennaia-c1009/1730814481?show-uid=15562851956411403665516001&nid=59742&context=search",
+                        "hide": True
+                    })
+            elif ans[1] == 1:
+                suggests.append({
+                    "title": "Перейти",
+                    "url": "https://mtgtrade.net/store/",
+                    "hide": True
+                })
+            elif ans[0] == 0 and ans[4] == 1:
+                suggests.append({
+                    "title": "Перейти",
+                    "url": "https://vseigrushki.com/dlya-devochek/kukly/kukla-steffi-s-nakleykami-dlya-volos",
+                    "hide": True
+                })
+            elif ans[0] == 0 and ans[4] == 0:
+                suggests.append({
+                    "title": "Перейти",
+                    "url": "https://loomlove.ru/kukla-lol-hairgoals?frommarket=https%3A%2F%2Fmarket.yandex.ru%2Fcatalog--kukly-i-pupsy%2F59733%2Flist%3Ftext%3Dкуклы%26hid%3D10682550%26suggest%3D2%26rt%3D10%26was_redir%3D1%26rs%3DeJwzYgpgBAABcwCG%26local-offers-first%3D0&ymclid=15562818774569526449600019",
+                    "hide": True
+                })
+            else:
+                suggests.append({
+                    "title": "Перейти",
+                    "url": "https://zak-zak.ru/products/nastolnaya-igra-bashnya-skvirl",
+                    "hide": True
+                })
+        elif ans[3] == 1:
+            if ans[0] == 0:
+                if ans[4] == 0:
+                    suggests.append({
+                        "title": "Перейти",
+                        "url": "https://market.yandex.ru/product--multivarka-redmond-rmk-m452/1723079328?show-uid=15562152959601729143716003&nid=54951&context=search",
+                        "hide": True
+                    })
+                else:
+                    suggests.append({
+                        "title": "Перейти",
+                        "url": "https://market.yandex.ru/product--chainik-bosch-twk-3a011-3a013-3a014-3a017/8480393?show-uid=15562153850616723237016005&nid=54967&context=search",
+                        "hide": True
+                    })
+            else:
+                if ans[4] == 0:
+                    suggests.append({
+                        "title": "Перейти",
+                        "url": "https://market.yandex.ru/product--akusticheskaia-sistema-show-tc-1240/272668174?show-uid=15562155887456643917616070&nid=56153&context=search",
+                        "hide": True
+                    })
+                else:
+                    suggests.append({
+                        "title": "Перейти",
+                        "url": "https://market.yandex.ru/product--akusticheskaia-sistema-cvgaudio-odf3t/359616098?show-uid=15562154779802586324816023&nid=56153&context=search",
+                        "hide": True
+                    })
+        else:
+            if ans[4] == 0:
+                suggests.append({
+                    "title": "Перейти",
+                    "url": "https://market.yandex.ru/product--naushniki-defender-accord-185/13599722?show-uid=15562160824423441632116002&nid=56179&pricefrom=1000&context=search",
+                    "hide": True
+                })
+            else:
+                suggests.append({
+                    "title": "Перейти",
+                    "url": "https://market.yandex.ru/product--naushniki-jbl-t450bt/1713715931?show-uid=15562159872208239989116007&nid=56179&context=search",
+                    "hide": True
+                })
+    return suggests
+
+
+if __name__ == '__main__':
+    app.run()
